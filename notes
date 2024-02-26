@@ -1,0 +1,76 @@
+followed the codetour tutorial from
+https://github.com/MicrosoftDocs/ef-core-for-beginners
+
+// add a .net mvc project first
+dotnet new mvc -n ProjectName
+
+// add entity dependencies either thru the explorer or by using ctrl+` and entering these three
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 6.0.4
+dotnet add package Microsoft.EntityFrameworkCore.Tools --version 6.0.4
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 6.0.4
+
+// create a model (entry) in Models folder
+PersonModel.cs
+
+// create a context file something like this in the Data folder
+DatabaseContext.cs
+
+// fill the context with the datasets that you have and also a connection string
+using ContosoPizza.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace ContosoPizza.Data;
+
+public class ContosoPizzaContext : DbContext
+{
+    public DbSet<Customer> Customers { get; set; } = null!;
+    public DbSet<Order> Orders { get; set; } = null!;
+    public DbSet<Product> Products { get; set; } = null!;
+    public DbSet<OrderDetail> OrderDetails { get; set; } = null!;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseSqlServer(@"Server=host.docker.internal,1433;Database=ContosoPizza;User ID=sa;Password=yourStrong(!)Password;");
+
+    }
+}
+
+
+// preparing for migrations (adding to the database)
+// adding a tool
+dotnet tool install -g dotnet-ef --version 6.0.4
+// adding a migration
+dotnet ef migrations add InitialCreate
+
+// folder named Migrations will appear, to apply the migration enter
+dotnet ef database update
+
+// press CTRL+ALT+D and make a connection with the same connection string as before
+// check to see changes
+
+// if you want to update something then just go to the models and add a new line to the model
+// then run these
+dotnet ef migrations add MigrationNameHere
+dotnet ef database update
+
+// add a Program.cs as a controller sort of thing in the main part directory
+using ContosoPizza.Data;
+using ContosoPizza.Models;
+
+using ContosoPizzaContext context = new ContosoPizzaContext();
+
+Product veggieSpecial = new Product()
+{
+    Name = "Veggie Special Pizza",
+    Price = 9.99M
+};
+context.Products.Add(veggieSpecial);
+
+Product deluxeMeat = new Product()
+{
+    Name = "Deluxe Meat Pizza",
+    Price = 12.99M
+};
+context.Add(deluxeMeat);
+
+context.SaveChanges();
