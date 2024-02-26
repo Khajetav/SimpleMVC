@@ -34,13 +34,10 @@ app.MapControllerRoute(
 app.Run();
 #endregion
 
-public void AddPerson()
+using DatabaseContext context = new DatabaseContext();
+Person bobJones = new Person()
 {
-    using DatabaseContext context = new DatabaseContext();
-    Person bobJones = new Person()
-    {
-        FirstName = "Bob",
-        LastName = "Jones"
-    };
-    context.Products.Add(bobJones);
-}
+    FirstName = "Bob",
+    LastName = "Jones"
+};
+context.People.Add(bobJones);
